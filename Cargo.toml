@@ -1,10 +1,13 @@
 [package]
-name = "merk"
+name = "fmerk"
 description = "Merkle key/value store"
-version = "2.0.1"
-authors = ["Matt Bell <mappum@gmail.com>"]
+version = "0.1.0"
+authors = ["Matt Bell <mappum@gmail.com>", "Charlie Chen <charlie@findora.org>"]
 edition = "2018"
 license = "MIT"
+repository = "https://github.com/FindoraNetwork/fmerk"
+readme = "README.md"
+keywords = ["merkle", "merkle-tree", "fmerk", "merk", "findora"]
 
 [dependencies]
 time = "0.1.42"
