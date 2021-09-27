@@ -7,6 +7,7 @@ edition = "2018"
 license = "MIT"
 repository = "https://github.com/FindoraNetwork/fmerk"
 readme = "README.md"
+keywords = ["merkle", "merkle-tree", "fmerk", "merk", "findora"]
 
 [dependencies]
 time = "0.1.42"
