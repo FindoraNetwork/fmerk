@@ -133,11 +133,11 @@ impl Merk {
     ///
     /// # Example
     /// ```
-    /// # let mut store = merk::test_utils::TempMerk::new().unwrap();
+    /// # let mut store = fmerk::test_utils::TempMerk::new().unwrap();
     /// # store.apply(&[(vec![4,5,6], Op::Put(vec![0]))]).unwrap();
     ///
     ///
-    /// use merk::Op;
+    /// use fmerk::Op;
     ///
     /// let batch = &[
     ///     (vec![1, 2, 3], Op::Put(vec![4, 5, 6])), // puts value [4,5,6] to key [1,2,3]
@@ -171,10 +171,10 @@ impl Merk {
     ///
     /// # Example
     /// ```
-    /// # let mut store = merk::test_utils::TempMerk::new().unwrap();
+    /// # let mut store = fmerk::test_utils::TempMerk::new().unwrap();
     /// # store.apply(&[(vec![4,5,6], Op::Put(vec![0]))]).unwrap();
     ///
-    /// use merk::Op;
+    /// use fmerk::Op;
     ///
     /// let batch = &[
     ///     (vec![1, 2, 3], Op::Put(vec![4, 5, 6])), // puts value [4,5,6] to key [1,2,3]
