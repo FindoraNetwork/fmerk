@@ -2,7 +2,7 @@
 name = "fmerk"
 description = "Merkle key/value store"
 version = "0.1.0"
-authors = ["Matt Bell <mappum@gmail.com>", "Charlie Chen <charlie@findora.org>"]
+authors = ["FindoraNetwork"]
 edition = "2018"
 license = "MIT"
 repository = "https://github.com/FindoraNetwork/fmerk"
