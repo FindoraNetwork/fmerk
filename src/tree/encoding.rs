@@ -1,5 +1,5 @@
 use super::Tree;
-use ed::{Decode, Encode};
+use ed2::{Decode, Encode};
 
 impl Tree {
     pub fn encode(&self) -> Vec<u8> {

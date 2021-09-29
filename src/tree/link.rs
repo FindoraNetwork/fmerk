@@ -1,7 +1,7 @@
 use std::cmp::max;
 use std::io::{Read, Write};
 
-use ed::{Decode, Encode, Result, Terminated};
+use ed2::{Decode, Encode, Result, Terminated};
 
 use crate::HASH_LENGTH;
 

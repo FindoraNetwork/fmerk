@@ -1,7 +1,7 @@
 use std::convert::TryInto;
 use std::io::{Read, Write};
 
-use ed::{Encode, Decode, Terminated};
+use ed2::{Encode, Decode, Terminated};
 use failure::bail;
 
 use super::{Op, Node};
@@ -9,7 +9,7 @@ use crate::tree::HASH_LENGTH;
 use crate::error::Result;
 
 impl Encode for Op {
-    fn encode_into<W: Write>(&self, dest: &mut W) -> ed::Result<()> {
+    fn encode_into<W: Write>(&self, dest: &mut W) -> ed2::Result<()> {
         match self {
             Op::Push(Node::Hash(hash)) => {
                 dest.write_all(&[ 0x01 ])?;
@@ -37,7 +37,7 @@ impl Encode for Op {
         Ok(())
     }
 
-    fn encoding_length(&self) -> ed::Result<usize> {
+    fn encoding_length(&self) -> ed2::Result<usize> {
         Ok(match self {
             Op::Push(Node::Hash(_)) => 1 + HASH_LENGTH,
             Op::Push(Node::KVHash(_)) => 1 + HASH_LENGTH,
@@ -49,7 +49,7 @@ impl Encode for Op {
 }
 
 impl Decode for Op {
-    fn decode<R: Read>(mut input: R) -> ed::Result<Self> {
+    fn decode<R: Read>(mut input: R) -> ed2::Result<Self> {
         let variant: u8 = Decode::decode(&mut input)?;
 
         Ok(match variant {

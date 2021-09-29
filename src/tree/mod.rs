@@ -11,7 +11,7 @@ mod walk;
 
 use std::cmp::max;
 
-use ed::{Decode, Encode};
+use ed2::{Decode, Encode};
 
 use super::error::Result;
 pub use commit::{Commit, NoopCommit};

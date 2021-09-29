@@ -1,5 +1,5 @@
 use super::hash::{kv_hash, Hash, HASH_LENGTH, NULL_HASH};
-use ed::{Decode, Encode, Result};
+use ed2::{Decode, Encode, Result};
 use std::io::{Read, Write};
 
 // TODO: maybe use something similar to Vec but without capacity field,
