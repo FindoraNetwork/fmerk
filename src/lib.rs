@@ -1,6 +1,3 @@
-#[global_allocator]
-static ALLOC: jemallocator::Jemalloc = jemallocator::Jemalloc;
-
 pub use rocksdb;
 
 /// Error and Result types.

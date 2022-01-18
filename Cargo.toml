@@ -30,7 +30,3 @@ features = ["small_rng"]
 [dependencies.rocksdb]
 version = "0.17.0"
 default-features = false
-
-[dependencies.jemallocator]
-version = "0.3.2"
-features = ["disable_initial_exec_tls"]
