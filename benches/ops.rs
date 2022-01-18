@@ -3,8 +3,8 @@
 extern crate test;
 
 use test::Bencher;
-use merk::test_utils::*;
-use merk::owner::Owner;
+use fmerk::test_utils::*;
+use fmerk::owner::Owner;
 
 #[bench]
 fn insert_1m_10k_seq_memonly(b: &mut Bencher) {
