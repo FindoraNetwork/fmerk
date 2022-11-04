@@ -282,6 +282,20 @@ impl Merk {
         Ok(self.db.flush()?)
     }
 
+    /// export all auxiliary key\value.
+    /// cs: Export of the target object
+    pub fn export_aux(&mut self,cs: &mut Self) -> Result<()>{
+        let  aux_cf = self.db.cf_handle("aux").unwrap();
+        for (k, v) in self.db.iterator_cf(aux_cf, IteratorMode::Start) {
+            let expected = vec![
+                (k.to_vec().clone(), Op::Put(v.to_vec().clone())),
+            ];
+            cs.commit(&expected)
+                .expect("commit failed");
+        }
+        Ok(())
+    }
+
     pub fn commit(&mut self, aux: &Batch) -> Result<()> {
         let internal_cf = self.db.cf_handle("internal").unwrap();
         let aux_cf = self.db.cf_handle("aux").unwrap();
@@ -557,6 +571,22 @@ mod test {
         merk.commit(&[(vec![1, 2, 3], Op::Put(vec![4, 5, 6]))])
             .expect("commit failed");
         let val = merk.get_aux(&[1, 2, 3]).unwrap();
+        assert_eq!(val, Some(vec![4, 5, 6]));
+    }
+
+    #[test]
+    fn export_aux_data() {
+        let path = thread::current().name().unwrap().to_owned();
+        let mut merk = TempMerk::open(path).expect("failed to open merk");
+        merk.apply(&[]).expect("apply failed");
+        merk.commit(&[(vec![1, 2, 3], Op::Put(vec![4, 5, 6]))])
+            .expect("commit failed");
+        let val = merk.get_aux(&[1, 2, 3]).unwrap();
+        assert_eq!(val, Some(vec![4, 5, 6]));
+
+        let mut cs_merk = TempMerk::new().unwrap();
+        merk.export_aux(&mut cs_merk).expect("commit failed");
+        let val = cs_merk.get_aux(&[1, 2, 3]).unwrap();
         assert_eq!(val, Some(vec![4, 5, 6]));
     }
 
