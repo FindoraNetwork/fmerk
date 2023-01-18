@@ -1,5 +1,4 @@
 use std::collections::HashSet;
-use std::collections::LinkedList;
 use std::path::{Path, PathBuf};
 
 use failure::bail;
@@ -198,7 +197,7 @@ impl Merk {
             .take()
             .map(|tree| Walker::new(tree, self.source()));
 
-        let (maybe_tree, mut deleted_keys) = Walker::apply_to(maybe_walker, batch)?;
+        let (maybe_tree, deleted_keys) = Walker::apply_to(maybe_walker, batch)?;
         self.tree = maybe_tree;
         for key in deleted_keys {
             self.deleted_keys.insert(key);
@@ -284,24 +283,21 @@ impl Merk {
 
     /// export all auxiliary key\value.
     /// cs: Export of the target object
-    pub fn export_aux(&mut self,cs: &mut Self) -> Result<()>{
-        let  aux_cf = self.db.cf_handle("aux").unwrap();
+    pub fn export_aux(&mut self, cs: &mut Self) -> Result<()> {
+        let aux_cf = self.db.cf_handle("aux").unwrap();
         for (k, v) in self.db.iterator_cf(aux_cf, IteratorMode::Start) {
-            let expected = vec![
-                (k.to_vec().clone(), Op::Put(v.to_vec().clone())),
-            ];
-            cs.commit(&expected)
-                .expect("commit failed");
+            let expected = vec![(k.to_vec().clone(), Op::Put(v.to_vec().clone()))];
+            cs.commit(&expected).expect("commit failed");
         }
         Ok(())
     }
 
     pub fn commit(&mut self, aux: &Batch) -> Result<()> {
         let internal_cf = self.db.cf_handle("internal").unwrap();
-        let aux_cf = self.db.cf_handle("aux").unwrap();
+        let _ = self.db.cf_handle("aux").unwrap();
 
         let mut batch = rocksdb::WriteBatch::default();
-        let mut res_batch: Result<Vec<(Vec<u8>, Option<Vec<u8>>)>> = match self.tree.as_mut() {
+        let res_batch: Result<Vec<(Vec<u8>, Option<Vec<u8>>)>> = match self.tree.as_mut() {
             // TODO: concurrent commit
             Some(tree) => {
                 // TODO: configurable committer
@@ -401,13 +397,6 @@ impl Merk {
         //self.tree.set(tree);
         res
     }
-
-    fn use_tree_mut<T>(&mut self, mut f: impl FnMut(Option<&mut Tree>) -> T) -> T {
-        //let mut tree = self.tree.take();
-        let res = f(self.tree.as_mut());
-        //self.tree.set(tree);
-        res
-    }
 }
 
 impl Drop for Merk {
@@ -476,7 +465,6 @@ fn fetch_existing_node(db: &rocksdb::DB, key: &[u8]) -> Result<Tree> {
 
 #[cfg(test)]
 mod test {
-    use super::Merk;
     use crate::test_utils::*;
     use crate::tree;
     use crate::Op;

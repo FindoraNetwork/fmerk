@@ -1,13 +1,15 @@
-use rocksdb::DBRawIterator;
-
-use super::{Node, Op};
-use crate::error::Result;
-use crate::tree::{Fetch, RefWalker, Tree};
+use crate::tree::{Fetch, RefWalker};
+#[cfg(test)]
+use {
+    super::{Node, Op},
+    crate::error::Result,
+};
 
 impl<'a, S> RefWalker<'a, S>
 where
     S: Fetch + Sized + Send + Clone,
 {
+    #[cfg(test)]
     fn create_trunk_proof(&mut self) -> Result<Vec<Op>> {
         let approx_size = 2u8.pow((self.tree().height() / 2) as u32);
         let mut proof = Vec::with_capacity(approx_size as usize);
@@ -19,6 +21,7 @@ where
     }
 
     // traverse to leftmost node to prove height of tree
+    #[cfg(test)]
     fn traverse_for_height_proof(&mut self, proof: &mut Vec<Op>, depth: u8) -> Result<u8> {
         let maybe_left = self.walk(true)?;
         let has_left_child = maybe_left.is_some();
@@ -46,6 +49,7 @@ where
     }
 
     // build proof for all nodes in chunk
+    #[cfg(test)]
     fn traverse_for_trunk(
         &mut self,
         proof: &mut Vec<Op>,
@@ -98,7 +102,9 @@ where
     }
 }
 
-fn get_next_chunk(iter: &mut DBRawIterator, end_key: Option<&[u8]>) -> Result<Vec<Op>> {
+#[cfg(test)]
+fn get_next_chunk(iter: &mut rocksdb::DBRawIterator, end_key: Option<&[u8]>) -> Result<Vec<Op>> {
+    use crate::tree::Tree;
     let mut chunk = Vec::with_capacity(512);
     let mut stack = Vec::with_capacity(32);
     let mut node = Tree::new(vec![], vec![]);

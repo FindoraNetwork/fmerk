@@ -1,7 +1,7 @@
 #![feature(test)]
 extern crate test;
 
-use merk::test_utils::*;
+use fmerk::test_utils::*;
 use std::thread;
 use test::Bencher;
 
