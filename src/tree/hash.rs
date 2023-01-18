@@ -1,4 +1,4 @@
-use {blake2_rfc::blake2b::Blake2b, digest::Digest, std::convert::TryFrom};
+use {blake2_rfc::blake2b::Blake2b, std::convert::TryFrom};
 
 /// The length of a `Hash` (in bytes).
 pub const HASH_LENGTH: usize = 32;
