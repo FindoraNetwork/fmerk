@@ -36,14 +36,14 @@ fn fuzz_case(seed: u64) {
     let mut map = Map::from_iter(tree.iter());
     let mut maybe_tree = Some(tree);
     println!("====== MERK FUZZ ======");
-    println!("SEED: {}", seed);
+    println!("SEED: {seed}");
     println!("{:?}", maybe_tree.as_ref().unwrap());
 
     for j in 0..3 {
         let batch_size = (rng.gen::<u64>() % 3) + 1;
         let batch = make_batch(maybe_tree.as_ref(), batch_size, rng.gen::<u64>());
-        println!("BATCH {}", j);
-        println!("{:?}", batch);
+        println!("BATCH {j}");
+        println!("{batch:?}");
         maybe_tree = apply_to_memonly(maybe_tree, &batch);
         apply_to_map(&mut map, &batch);
         assert_map(maybe_tree.as_ref(), &map);

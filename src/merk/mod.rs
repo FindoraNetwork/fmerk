@@ -1,3 +1,4 @@
+use std::cmp::Ordering::{Equal, Greater, Less};
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 
@@ -18,6 +19,8 @@ pub struct Merk {
     pub(crate) path: PathBuf,
     deleted_keys: HashSet<Vec<u8>>,
 }
+
+pub type KeyValuePair = (Vec<u8>, Option<Vec<u8>>);
 
 impl Merk {
     /// Opens a store with the specified file path. If no store exists at that
@@ -45,7 +48,7 @@ impl Merk {
         let tree = Merk::load_root_node_from_db(&db)?;
 
         Ok(Merk {
-            tree: tree,
+            tree,
             db,
             path: path_buf,
             deleted_keys: Default::default(),
@@ -69,7 +72,7 @@ impl Merk {
         // try to load root node
         let internal_cf = db.cf_handle("internal").unwrap();
         let tree = match db.get_pinned_cf(internal_cf, ROOT_KEY_KEY)? {
-            Some(root_key) => Some(fetch_existing_node(&db, &root_key)?),
+            Some(root_key) => Some(fetch_existing_node(db, &root_key)?),
             None => None,
         };
 
@@ -156,13 +159,13 @@ impl Merk {
     /// ```
     pub fn apply(&mut self, batch: &Batch) -> Result<()> {
         // ensure keys in batch are sorted and unique
-        let mut maybe_prev_key = None;
+        let mut maybe_prev_key: Option<Vec<_>> = None;
         for (key, _) in batch.iter() {
             if let Some(prev_key) = maybe_prev_key {
-                if prev_key > *key {
-                    bail!("Keys in batch must be sorted");
-                } else if prev_key == *key {
-                    bail!("Keys in batch must be unique");
+                match prev_key.cmp(key) {
+                    Equal => bail!("Keys in batch must be unique"),
+                    Greater => bail!("Keys in batch must be sorted"),
+                    Less => (),
                 }
             }
             maybe_prev_key = Some(key.to_vec());
@@ -191,6 +194,7 @@ impl Merk {
     /// ];
     /// unsafe { store.apply_unchecked(batch).unwrap() };
     /// ```
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn apply_unchecked(&mut self, batch: &Batch) -> Result<()> {
         let maybe_walker = self
             .tree
@@ -233,6 +237,7 @@ impl Merk {
     /// check adds some overhead, so if you are sure your batch is sorted and
     /// unique you can use the unsafe `prove_unchecked` for a small performance
     /// gain.
+    #[allow(clippy::comparison_chain)]
     pub fn prove(&mut self, query: &[Vec<u8>]) -> Result<Vec<u8>> {
         // ensure keys in query are sorted and unique
         let mut maybe_prev_key = None;
@@ -262,6 +267,7 @@ impl Merk {
     /// if they are not, there will be undefined behavior. For a safe version of
     /// this method which checks to ensure the batch is sorted and unique, see
     /// `prove`.
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn prove_unchecked(&mut self, query: &[Vec<u8>]) -> Result<Vec<u8>> {
         let tree = match self.tree.as_mut() {
             None => bail!("Cannot create proof for empty tree"),
@@ -297,7 +303,7 @@ impl Merk {
         let _ = self.db.cf_handle("aux").unwrap();
 
         let mut batch = rocksdb::WriteBatch::default();
-        let res_batch: Result<Vec<(Vec<u8>, Option<Vec<u8>>)>> = match self.tree.as_mut() {
+        let res_batch: Result<Vec<KeyValuePair>> = match self.tree.as_mut() {
             // TODO: concurrent commit
             Some(tree) => {
                 // TODO: configurable committer
@@ -527,7 +533,7 @@ mod test {
         let mut merk = TempMerk::open(path).expect("failed to open merk");
 
         for i in 0..(tree_size / batch_size) {
-            println!("i:{}", i);
+            println!("i:{i}");
             let batch = make_batch_rand(batch_size, i);
             merk.apply(&batch).expect("apply failed");
             merk.commit(&[]).expect("commit failed");

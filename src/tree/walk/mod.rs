@@ -31,6 +31,7 @@ where
 
     /// Similar to `Tree#detach`, but yields a `Walker` which fetches from the
     /// same source as `self`. Returned tuple is `(updated_self, maybe_child_walker)`.
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn detach(mut self, left: bool) -> Result<(Self, Option<Self>)> {
         let link = match self.tree.link(left) {
             None => return Ok((self, None)),
@@ -57,6 +58,7 @@ where
 
     /// Similar to `Tree#detach_expect`, but yields a `Walker` which fetches
     /// from the same source as `self`. Returned tuple is `(updated_self, child_walker)`.
+    #[allow(clippy::missing_safety_doc)]
     pub unsafe fn detach_expect(self, left: bool) -> Result<(Self, Self)> {
         let (walker, maybe_child) = self.detach(left)?;
         if let Some(child) = maybe_child {

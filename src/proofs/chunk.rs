@@ -72,7 +72,7 @@ where
             proof.push(Op::Push(self.to_kv_node()));
 
             // add parent op to connect left child
-            if let Some(_) = self.tree().link(true) {
+            if self.tree().link(true).is_some() {
                 proof.push(Op::Parent);
             }
 
@@ -158,7 +158,7 @@ mod tests {
         let mut walker = RefWalker::new(&mut tree, PanicSource {});
 
         let proof = walker.create_trunk_proof().unwrap();
-        println!("{:?}", proof);
+        println!("{proof:?}");
     }
 
     #[test]
@@ -175,6 +175,6 @@ mod tests {
         let mut iter = merk.db.raw_iterator();
         iter.seek_to_first();
         let chunk = get_next_chunk(&mut iter, Some(root_key.as_slice()));
-        println!("{:?}", chunk);
+        println!("{chunk:?}");
     }
 }

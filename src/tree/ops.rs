@@ -17,7 +17,7 @@ impl fmt::Debug for Op {
             f,
             "{}",
             match self {
-                Put(value) => format!("Put({:?})", value),
+                Put(value) => format!("Put({value:?})"),
                 Delete => "Delete".to_string(),
             }
         )
@@ -397,14 +397,14 @@ mod test {
             .expect("apply errored");
         maybe_walker.expect("should be Some");
         let mut deleted_keys: Vec<&Vec<u8>> = deleted_keys.iter().collect();
-        deleted_keys.sort_by(|a, b| a.cmp(&b));
+        deleted_keys.sort();
         assert_eq!(deleted_keys, vec![&seq_key(7), &seq_key(9)]);
     }
 
     #[test]
     fn apply_empty_none() {
         let (maybe_tree, deleted_keys) =
-            Walker::<PanicSource>::apply_to(None, &vec![]).expect("apply_to failed");
+            Walker::<PanicSource>::apply_to(None, &[]).expect("apply_to failed");
         assert!(maybe_tree.is_none());
         assert!(deleted_keys.is_empty());
     }
