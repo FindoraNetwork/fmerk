@@ -1,10 +1,8 @@
 use crate::{Merk, Result};
-use std::env::temp_dir;
 use std::fs;
 use std::mem::ManuallyDrop;
 use std::ops::{Deref, DerefMut};
 use std::path::Path;
-use std::time::SystemTime;
 
 /// Wraps a Merk instance and drops it without flushing once it goes out of
 /// scope.
@@ -26,14 +24,16 @@ impl CrashMerk {
     }
 
     pub fn crash(&mut self) -> Result<()> {
-        drop(self.inner.take().unwrap());
+        unsafe {
+            std::mem::ManuallyDrop::drop(&mut self.inner.take().unwrap());
+        }
 
         // rename to invalidate rocksdb's lock
         let file_name = format!(
             "{}_crashed",
             self.path.file_name().unwrap().to_str().unwrap()
         );
-        let mut new_path = self.path.with_file_name(file_name);
+        let new_path = self.path.with_file_name(file_name);
         fs::rename(&self.path, &new_path)?;
 
         let mut new_merk = CrashMerk::open(&new_path)?;
@@ -67,7 +67,6 @@ impl DerefMut for CrashMerk {
 
 #[cfg(test)]
 mod tests {
-    use super::super::TempMerk;
     use super::CrashMerk;
     use crate::Op;
 
@@ -76,7 +75,7 @@ mod tests {
     fn crash() {
         let path = std::thread::current().name().unwrap().to_owned();
 
-        let mut merk = CrashMerk::open(&path).expect("failed to open merk");
+        let mut merk = CrashMerk::open(path).expect("failed to open merk");
         merk.apply(&[(vec![1, 2, 3], Op::Put(vec![4, 5, 6]))])
             .expect("apply failed");
         merk.commit(&[]).expect("commit failed");

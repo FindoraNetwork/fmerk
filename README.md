@@ -28,8 +28,8 @@ cargo add merk
 
 **Example:**
 ```rust
-extern crate merk;
-use merk::*;
+extern crate fmerk;
+use fmerk::*;
 
 // load or create a Merk store at the given path
 let mut merk = Merk::open("./merk.db").unwrap();

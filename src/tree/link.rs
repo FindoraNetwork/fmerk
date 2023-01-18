@@ -62,28 +62,19 @@ impl Link {
     /// Returns `true` if the link is of the `Link::Pruned` variant.
     #[inline]
     pub fn is_pruned(&self) -> bool {
-        match self {
-            Link::Pruned { .. } => true,
-            _ => false,
-        }
+        matches!(self, Link::Pruned { .. })
     }
 
     /// Returns `true` if the link is of the `Link::Modified` variant.
     #[inline]
     pub fn is_modified(&self) -> bool {
-        match self {
-            Link::Modified { .. } => true,
-            _ => false,
-        }
+        matches!(self, Link::Modified { .. })
     }
 
     /// Returns `true` if the link is of the `Link::Stored` variant.
     #[inline]
     pub fn is_stored(&self) -> bool {
-        match self {
-            Link::Stored { .. } => true,
-            _ => false,
-        }
+        matches!(self, Link::Stored { .. })
     }
 
     /// Returns the key of the tree referenced by this link, as a slice.
