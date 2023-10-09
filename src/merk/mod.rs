@@ -18,6 +18,7 @@ pub struct Merk {
     pub(crate) db: rocksdb::DB,
     pub(crate) path: PathBuf,
     deleted_keys: HashSet<Vec<u8>>,
+    is_secondary: bool,
 }
 
 impl Merk {
@@ -50,6 +51,40 @@ impl Merk {
             db,
             path: path_buf,
             deleted_keys: Default::default(),
+            is_secondary: false,
+        })
+    }
+
+    pub fn open_as_secondary<P: AsRef<Path>>(path: P, secondary_path: P) -> Result<Self> {
+        let db_opts = Self::default_db_opts();
+        Self::open_opt_as_secondary(path, secondary_path, db_opts)
+    }
+    pub fn secondary_catch_up_primary(&self) -> Result<()> {
+        self.db.try_catch_up_with_primary().map_err(|e| e.into())
+    }
+    pub fn open_opt_as_secondary<P>(
+        path: P,
+        secondary_path: P,
+        db_opts: rocksdb::Options,
+    ) -> Result<Merk>
+    where
+        P: AsRef<Path>,
+    {
+        let mut path_buf = PathBuf::new();
+        path_buf.push(path);
+        let mut secondary_path_buf = PathBuf::new();
+        secondary_path_buf.push(secondary_path);
+        let cfs = vec!["aux", "internal"];
+        let db = rocksdb::DB::open_cf_as_secondary(&db_opts, &path_buf, &secondary_path_buf, cfs)?;
+
+        let tree = Merk::load_root_node_from_db(&db)?;
+
+        Ok(Merk {
+            tree,
+            db,
+            path: path_buf,
+            deleted_keys: Default::default(),
+            is_secondary: true,
         })
     }
 
@@ -398,7 +433,9 @@ impl Merk {
 
 impl Drop for Merk {
     fn drop(&mut self) {
-        self.db.flush().unwrap();
+        if !self.is_secondary {
+            self.db.flush().unwrap();
+        }
     }
 }
 
