@@ -59,8 +59,10 @@ impl Merk {
         let db_opts = Self::default_db_opts();
         Self::open_opt_as_secondary(path, secondary_path, db_opts)
     }
-    pub fn secondary_catch_up_primary(&self) -> Result<()> {
-        self.db.try_catch_up_with_primary().map_err(|e| e.into())
+    pub fn secondary_catch_up_primary(&mut self) -> Result<()> {
+        let ret = self.db.try_catch_up_with_primary().map_err(|e| e.into());
+        self.tree = Merk::load_root_node_from_db(&self.db)?;
+        ret
     }
     pub fn open_opt_as_secondary<P>(
         path: P,
