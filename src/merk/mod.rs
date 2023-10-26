@@ -89,7 +89,30 @@ impl Merk {
             is_secondary: true,
         })
     }
+    pub fn open_read_only<P: AsRef<Path>>(path: P) -> Result<Self> {
+        let db_opts = Self::default_db_opts();
+        Self::open_opt_read_only(path, db_opts)
+    }
 
+    pub fn open_opt_read_only<P>(path: P, db_opts: rocksdb::Options) -> Result<Merk>
+    where
+        P: AsRef<Path>,
+    {
+        let mut path_buf = PathBuf::new();
+        path_buf.push(path);
+        let cfs = vec!["aux", "internal"];
+        let db = rocksdb::DB::open_cf_for_read_only(&db_opts, &path_buf, cfs, false)?;
+
+        let tree = Merk::load_root_node_from_db(&db)?;
+
+        Ok(Merk {
+            tree,
+            db,
+            path: path_buf,
+            deleted_keys: Default::default(),
+            is_secondary: true,
+        })
+    }
     pub fn default_db_opts() -> rocksdb::Options {
         let mut opts = rocksdb::Options::default();
         opts.create_if_missing(true);

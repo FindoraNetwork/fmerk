@@ -1,10 +1,8 @@
 use crate::{Merk, Result};
-use std::env::temp_dir;
 use std::fs;
 use std::mem::ManuallyDrop;
 use std::ops::{Deref, DerefMut};
 use std::path::Path;
-use std::time::SystemTime;
 
 /// Wraps a Merk instance and drops it without flushing once it goes out of
 /// scope.
